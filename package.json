@@ -1,0 +1,19 @@
+{
+  "name": "sabretache",
+  "version": "0.0.1",
+  "description": "A javascript library to discover similarities in html documents.",
+  "main": "./build/sabretache.concat.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:Yomguithereal/sabretache.git"
+  },
+  "author": "yomguithereal <kropotkinepiotr@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Yomguithereal/sabretache/issues"
+  },
+  "homepage": "https://github.com/Yomguithereal/sabretache"
+}
