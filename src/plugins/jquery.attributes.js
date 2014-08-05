@@ -9,7 +9,6 @@
    * given elements.
    */
 
-  // TODO: filter empty class
   function _classes($) {
     $.fn.classes = function() {
       var index = {},
@@ -42,6 +41,10 @@
       if (!$e[0])
         throw Error('jquery.attributes: trying to access attributes ' +
                     'of no element.');
+
+      // Short exit
+      if (!$e[0].attributes)
+        return attrs;
 
       for (i = 0, l = $e[0].attributes.length; i < l; i++) {
         a = $e[0].attributes[i];

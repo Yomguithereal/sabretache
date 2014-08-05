@@ -36,10 +36,16 @@
         'br',
         'hr',
         'iframe',
-        'script'
+        'script',
+        'style'
       ]
     }
 
+    // TODO: customize identity
+    // TODO: find another for tables and such
+    // TODO: choose a blurry way
+    // TODO: consider nth-child and such
+    // TODO: provide a full memoization through jquery.data
     $.fn.footprint = function(recur) {
       var $e = $(this).first(),
           $children,
@@ -47,46 +53,52 @@
           fp = [],
           attrs;
 
-      //--1) Getting element tag name
-      fp.push($e.prop('tagName'));
+      //-- 1) Getting element tag name
+      fp.push('+' + $e.prop('tagName'));
 
-      //--2) Retrieving relevant classes
+      //-- 2) Retrieving relevant classes
       $e.classes().forEach(function(c) {
 
         // Getting class usage
-        // TODO: memoize this
         // TODO: find a finer statistical way
         if (!~blacklists.classes.indexOf(c) && $('.' + c).length > 2)
           fp.push('.' + c);
       });
 
-      //--3) Retrieving attributes
+      //-- 3) Retrieving attributes
       attrs = $e.attributes(blacklists.attributes);
       Object.keys(attrs).forEach(function(n) {
         fp.push('[' + n + ']');
       });
 
-      //--4) Tagging
-      // TODO: define whether a tagging utility is useful or not
-
-      //--5) Computing parent
+      //-- 4) Computing parent
       var $parent = $e.parent();
       if ($parent.prop('tagName') !== 'BODY' &&
           $parent.prop('tagName') !== 'HTML' &&
           recur !== false)
-        fp.push('@parent(' + $parent.footprint(false).join(',') + ')');
+        fp.push('*parent(' + $parent.footprint(false).join(',') + ')');
 
-      //--6) Computing children
+      //-- 5) Computing children
       if (recur !== false) {
         $children = $e.children(':not(' + blacklists.children.join(',') + ')');
 
         // Iterating through children
         $children.each(function() {
-          fp.push('@child(' + $(this).footprint(false).join(',') + ')');
+          fp.push('*child(' + $(this).footprint(false).join(',') + ')');
         });
       }
 
-      // TODO: consider nth-child and such
+      //-- 6) Tagging
+      // TODO: define whether a tagging utility is useful or not
+      if (true && recur !== false) {
+        var txt = $e.text();
+        if (~txt.search(/\w/))
+          fp.push('@letters');
+        if (~txt.search(/\d/))
+          fp.push('@numbers');
+        if (~txt.split(/\s/).length > 1)
+          fp.push('@words');
+      }
 
       return fp;
     };

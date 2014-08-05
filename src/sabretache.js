@@ -10,7 +10,15 @@
 
    // Main object
    var sabretache = {
-    plugins: []
+    plugins: [],
+    settings: {
+      footprint: {
+
+        // TODO: by default, we could memoize when more than x nodes exist
+        memoize: false,
+        identity: []
+      }
+    }
    };
 
    // Methods
