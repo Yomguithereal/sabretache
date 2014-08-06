@@ -9,74 +9,54 @@
    * selected.
    */
 
-  var classBlackList = [
-    'hidden',
-    'disabled',
-    'active',
-    'activated',
-    'odd',
-    'even',
-    'first',
-    'last'
-  ];
+  // Helpers
+  // TODO: apply some weight to compare more finely
+  function compare(f1, f2) {
+    var errors = 0;
 
+    f1.forEach(function(i) {
+      if (!~f2.indexOf(i))
+        errors++;
+    });
+
+    f2.forEach(function(i) {
+      if (!~f1.indexOf(i))
+        errors++;
+    });
+
+    return errors < 2;
+  }
+
+  // Main function
+  // TODO: don't test the same node twice
   function _similar($) {
     $.fn.similar = function() {
-      var $e = $(this).first(),
-          $cur = $e,
-          $sel = null,
-          path = $e.path(false).split(' > '),
-          clsScore,
-          bestClsScore,
-          bestCls,
-          c,
-          i;
 
-      // We try to drop specific selection in a reverse order
-      for (i = path.length - 1; i > -1; i--) {
-        c = path[i];
+      // Selectors
+      var $node = $(this).first(),
+          $similar = $node,
+          $parent = $node.parent();
 
-        // Removing ids and nth-child
-        c = c.replace(/#[^.#:]+/g, '');
-        c = c.replace(/:nth-child\(\d+\)/g, '');
+      // Footprint
+      var footprint = $node.footprint();
 
-        // Dropping specific classes
-        c = c.replace(/\.[^.#:]+/g, '');
+      // Iterating back to parents
+      while ($parent.prop('tagName') !== 'BODY') {
 
-        // Adding best class
-        bestClsScore = 0;
-        bestCls = null;
-        $cur.classes().forEach(function(cls) {
-          if (!~classBlackList.indexOf(cls)) {
-            clsScore = $('.' + cls).length;
-
-            if (clsScore > 2 && clsScore > bestClsScore) {
-              bestClsScore = clsScore;
-              bestCls = cls;
-            }
-          }
+        // Finding similar elements in downright nodes
+        $parent.find('*:visible').each(function() {
+          if (compare($(this).footprint(), footprint))
+            $similar = $similar.add(this);
         });
 
-        if (bestCls)
-          c += '.' + bestCls;
-
-        // Filtering on visible elements only
-        c += ':visible';
-
-        // Are there more than one element in the new selection?
-        path[i] = c;
-        $sel = $(path.join(' > '));
-
-        // TODO: try and find a statistical way to define threshold
-        // If two elements or more are selected, we have a potential winner
-        if ($sel.length > 2)
+        if ($similar.length > 2)
           break;
 
-        // Go to parent
-        $cur = $cur.parent();
+        // Go to next parent
+        $parent = $parent.parent();
       }
 
-      return $sel || $(this);
+      return $similar;
     };
   }
 

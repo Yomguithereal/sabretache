@@ -61,8 +61,9 @@
 
         // Getting class usage
         // TODO: find a finer statistical way
+        // TODO: define whether the third parent is ok
         if (!~blacklists.classes.indexOf(c) &&
-            $e.parent().parent().find('.' + c).length > 2)
+            $e.parent().parent().parent().find('.' + c).length > 2)
           fp.push('.' + c);
       });
 
