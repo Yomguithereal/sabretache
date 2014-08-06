@@ -2,11 +2,10 @@
   'use strict';
 
   /**
-   * sabretache attributes jquery plugin
-   * ====================================
+   * sabretache misc jQuery plugins
+   * ===============================
    *
-   * Simplistic jQuery plugin designed to retrieve list of attributes for the
-   * given elements.
+   * Compilation of minor but useful jQuery plugins.
    */
 
   function _classes($) {

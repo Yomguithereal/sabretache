@@ -61,7 +61,8 @@
 
         // Getting class usage
         // TODO: find a finer statistical way
-        if (!~blacklists.classes.indexOf(c) && $('.' + c).length > 2)
+        if (!~blacklists.classes.indexOf(c) &&
+            $e.parent().parent().find('.' + c).length > 2)
           fp.push('.' + c);
       });
 
@@ -89,8 +90,7 @@
       }
 
       //-- 6) Tagging
-      // TODO: define whether a tagging utility is useful or not
-      if (true && recur !== false) {
+      if (false && recur !== false) {
         var txt = $e.text();
         if (~txt.search(/\w/))
           fp.push('@letters');
@@ -98,6 +98,24 @@
           fp.push('@numbers');
         if (~txt.split(/\s/).length > 1)
           fp.push('@words');
+      }
+
+      //-- 7) Position (if relevant because of table)
+      if (recur !== false) {
+        if ($e.parents('table').length &&
+            !$e.closest('th').length)
+          fp.push('!' + $e.closest('td').index());
+      }
+
+      //-- 8) Experimental href pattern recognition
+      // TODO: memoize in some way
+      var href = $e.attr('href'),
+          baseUrl;
+
+      if (href) {
+        baseUrl = href.split('?')[0];
+        if ($('[href^="' + baseUrl + '?"]').length > 2)
+          fp.push('[href^="' + baseUrl + '?"]');
       }
 
       return fp;

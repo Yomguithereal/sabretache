@@ -8,7 +8,11 @@
    * A test bookmarklet to tune footprints.
    */
 
-  // Announcing
+  // IMPROVE: jquery homepage bottom, why does not match?
+  // IMPROVE: jquery homepage top nav, why does not match?
+  // IMPROVE: hacker news find way to detect patterns in urls?
+
+  // Being a sassy droid...
   artoo.beep.sassy();
 
   // Bootstrapping
@@ -20,6 +24,7 @@
   document.head.appendChild(style);
 
   // Helpers
+  // TODO: apply some weights to footprint components
   function compare(f1, f2) {
     var errors = 0;
 
@@ -37,7 +42,8 @@
   }
 
   // Click on anything
-  // TODO: try one more step
+  // TODO: try one more step or enable user to expand the selection by
+  // ascending the tree
   $('*:not(html,body)').click(function(e) {
 
     // Removing precedent highlight
@@ -75,6 +81,7 @@
     }
 
     // Highlighting
+    console.log($similar.length + ' elements found!');
     $similar.addClass('sabretache');
   });
 }).call(this, artoo.$);
