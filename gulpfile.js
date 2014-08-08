@@ -9,6 +9,7 @@ var gulp = require('gulp'),
 // Files
 var files = [
   './src/sabretache.js',
+  './src/sabretache.readability.js',
   './src/plugins/*.js'
 ];
 
@@ -29,6 +30,22 @@ gulp.task('bookmarklets', function() {
       version: 'edge',
       settings: {
         scriptUrl: 'https://localhost:8000/test/bookmarklets/footprint_test.js',
+        dependencies: [
+          {
+            name: 'sabretache',
+            globals: 'sabretache',
+            url: 'https://localhost:8000/build/sabretache.concat.js'
+          }
+        ]
+      }
+    }))
+    .pipe(gulp.dest('./build/bookmarklets'));
+
+  artoo.blank('sabretache.readability.bookmark.js')
+    .pipe(artoo({
+      version: 'edge',
+      settings: {
+        scriptUrl: 'https://localhost:8000/test/bookmarklets/readability_test.js',
         dependencies: [
           {
             name: 'sabretache',

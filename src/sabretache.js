@@ -10,19 +10,21 @@
 
    // Main object
    var sabretache = {
+    $: {},
     plugins: [],
     settings: {
       footprint: {
-
-        // TODO: by default, we could memoize when more than x nodes exist
         memoize: false,
         identity: []
       }
     }
    };
 
-   // Methods
+   // Generic methods
    sabretache.bootstrap = function($) {
+
+    // Storing jQuery reference
+    sabretache.$ = $;
 
     // Applying jQuery plugins to the given instance
     sabretache.plugins.forEach(function(p) {

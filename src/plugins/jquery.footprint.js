@@ -50,8 +50,12 @@
       var $e = $(this).first(),
           $children,
           $parent,
-          fp = [],
+          fp = $e.data('footprint') || [],
           attrs;
+
+      // Do we already have the footprint stored?
+      if (fp.length)
+        return fp;
 
       //-- 1) Getting element tag name
       fp.push('+' + $e.prop('tagName'));
@@ -118,6 +122,10 @@
         if ($('[href^="' + baseUrl + '?"]').length > 2)
           fp.push('[href^="' + baseUrl + '?"]');
       }
+
+      // Should we memoize?
+      if (sabretache.settings.footprint.memoize)
+        $e.data('footprint', fp);
 
       return fp;
     };
