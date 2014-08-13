@@ -36,6 +36,11 @@
     prevLink:              /(prev|earl|old|new|<|«)/i
   };
 
+  // Should we apply on visible text only?
+  function normalizedText($node) {
+    return $node.text().trim().replace(/\s{2,}/g, ' ');
+  }
+
 
   // Functions
   //-----------
@@ -49,7 +54,7 @@
 
     // In case of #title
     if (typeof curTitle !== 'string')
-      curTitle = origTitle = $('title:first').text();
+      curTitle = origTitle = normalizedText($('title:first'));
 
     if (~curTitle.search(/ [\|\-] /)) {
       curTitle = origTitle.replace(/(.*)[\|\-] .*/gi,'$1');
@@ -66,7 +71,7 @@
     else if (curTitle.length > 150 || curTitle.length < 15) {
       var $h1 = sabretache.$('h1');
       if ($h1.length === 1)
-        curTitle = $h1.text();
+        curTitle = normalizedText($h1);
     }
 
     curTitle = curTitle.trim();
@@ -80,7 +85,7 @@
   // Initialize a node's score
   // TODO: check whether an object is needed here
   // TODO: flag classWeight
-  function initNode($node) {
+  function initNode($node, flags) {
     var score = 0;
 
     switch($node.prop('tagName')) {
@@ -116,7 +121,8 @@
         break;
     }
 
-    score += getClassWeight($node);
+    if (flags.classWeight)
+      score += getClassWeight($node);
 
     // Assigning data to node
     $node.data('readability', score);
@@ -151,18 +157,25 @@
 
   // Compute a node's link density
   function getLinkDensity($node) {
-    return ($node.find('a').text() || '').length / $node.text().length;
+    return (normalizedText($node.find('a')) || '').length /
+      normalizedText($node).length;
   };
+
 
   // Retrieving the article
   // TODO: first run: all flags to true
   function grabArticle(flags) {
+    flags = flags || {
+      classWeight: true,
+      stripUnlikelyCandidates: true
+    };
+
     var page = document.body,
         $ = sabretache.$;
 
     // TODO: grabbing frame or not
     var cacheHtml = page.innerHTML,
-        $elements = $('*', page);
+        $elements = $('*:visible', page);
 
     //-- 1) Trashing probably irrelevant nodes
     var $nodesToScore = $();
@@ -189,20 +202,21 @@
     var $candidates = $();
     $nodesToScore.each(function() {
 
-      var $parent = $(this).parent(),
-          $grandParent = $parent.parent(),
-          txt = $(this).text(),
+      // TODO: check whether it is possible to ascend to body or not
+      var $parent = $(this).parent().not('body, html'),
+          $grandParent = $parent.parent().not('body', 'html'),
+          txt = normalizedText($(this)),
           score = 0;
 
       if (!$parent.length || txt.length < 25)
         return;
 
       // Readability data for parent and grandparent
-      initNode($parent);
+      initNode($parent, flags);
       $candidates = $candidates.add($parent);
 
       if ($grandParent.length) {
-        initNode($grandParent);
+        initNode($grandParent, flags);
         $candidates = $candidates.add($grandParent);
       }
 
@@ -244,11 +258,11 @@
   // Interface
   //-----------
   sabretache.readability = function() {
+    var article = grabArticle();
+
     return {
       title: getArticleTitle(),
-      content: grabArticle({
-        stripUnlikelyCandidates: true
-      })
+      content: article
     };
   };
 }).call(this);

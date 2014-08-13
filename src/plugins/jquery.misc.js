@@ -62,7 +62,28 @@
     };
   }
 
+  function _nodeText($) {
+    $.fn.nodeText = function() {
+      return $(this).contents().filter(function() {
+        return this.nodeType === 3;
+      }).text();
+    };
+  }
+
+  function _visibleText($) {
+    $.fn.visibleText = function() {
+      return $.map($(this).contents(), function(e) {
+        if (e.nodeType === 3)
+          return $(e).text();
+        if ($(e).is(':visible:parent'))
+          return $(e).visibleText();
+      }).join('');
+    };
+  }
+
   // Exporting
   sabretache.plugins.push(_classes);
   sabretache.plugins.push(_attributes);
+  sabretache.plugins.push(_nodeText);
+  sabretache.plugins.push(_visibleText);
 }).call(this);
