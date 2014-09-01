@@ -15,5 +15,8 @@
   sabretache.bootstrap($);
 
   // Extracting
-  console.log(sabretache.readability());
+  var r = sabretache.readability();
+  $(r.articleNode).css('border', '2px solid red');
+  window.d = r.articleNode;
+  console.log(r);
 }).call(this, artoo.$);

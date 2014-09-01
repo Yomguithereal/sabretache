@@ -1,4 +1,5 @@
 var gulp = require('gulp'),
+    gutil = require('gulp-util'),
     concat = require('gulp-concat'),
     uglify = require('gulp-uglify'),
     rename = require('gulp-rename'),
@@ -18,7 +19,7 @@ gulp.task('build', function() {
   return gulp.src(files)
     .pipe(concat('sabretache.concat.js'))
     .pipe(gulp.dest('./build'))
-    .pipe(uglify())
+    .pipe(uglify().on('error', gutil.log))
     .pipe(rename('sabretache.min.js'))
     .pipe(gulp.dest('./build'));
 });

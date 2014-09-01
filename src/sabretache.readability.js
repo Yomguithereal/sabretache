@@ -14,6 +14,8 @@
    * It is thusly more suited to misc tasks needing article extraction
    * from raw html.
    *
+   * Please note that the original algorithm has been modified to take HTML5
+   * into account. Its behaviour is therefore slightly different.
    */
 
   // Utilities
@@ -38,7 +40,7 @@
 
   // Should we apply on visible text only?
   function normalizedText($node) {
-    return $node.text().trim().replace(/\s{2,}/g, ' ');
+    return $node.text().trim().replace(regexps.normalize, ' ');
   }
 
 
@@ -84,11 +86,16 @@
 
   // Initialize a node's score
   // TODO: check whether an object is needed here
-  // TODO: flag classWeight
-  function initNode($node, flags) {
+  function initNode($node, classWeight) {
+
+    // We do not initialize the node if this one is already initialized
+    if ($node.data('readability'))
+      return;
+
     var score = 0;
 
     switch($node.prop('tagName')) {
+      case 'ARTICLE':
       case 'DIV':
         score += 5;
         break;
@@ -121,7 +128,7 @@
         break;
     }
 
-    if (flags.classWeight)
+    if (classWeight)
       score += getClassWeight($node);
 
     // Assigning data to node
@@ -131,8 +138,8 @@
   // Computing a node's class weight
   function getClassWeight($node) {
     var weight = 0,
-        classes = $node.attr('class'),
-        id = $node.attr('id');
+        classes = $node.attr('class') || '',
+        id = $node.attr('id') || '';
 
     // Look for a special classname
     if (classes) {
@@ -158,12 +165,11 @@
   // Compute a node's link density
   function getLinkDensity($node) {
     return (normalizedText($node.find('a')) || '').length /
-      normalizedText($node).length;
+      (normalizedText($node).length || 1);
   };
 
 
   // Retrieving the article
-  // TODO: first run: all flags to true
   function grabArticle(flags) {
     flags = flags || {
       classWeight: true,
@@ -186,14 +192,14 @@
       if (flags.stripUnlikelyCandidates) {
         var matchString = ($this.attr('class') + $this.attr('id')) || '';
 
-        if (!~matchString.search(regexps.unlikelyCandidates) &&
-            ~matchString.search(regexps.okMaybeItsACandidate) &&
+        if (~matchString.search(regexps.unlikelyCandidates) &&
+            !~matchString.search(regexps.okMaybeItsACandidate) &&
             $this.prop('tagName')) {
           $elements = $elements.not(this);
         }
 
         if (~['P', 'TD', 'PRE'].indexOf($this.prop('tagName')) ||
-            ($this.prop('tagName') === 'DIV' && $this.children().length))
+            ($this.prop('tagName') === 'DIV' && !~$this.html().search(regexps.divToPElements)))
           $nodesToScore = $nodesToScore.add(this);
       }
     });
@@ -201,8 +207,6 @@
     //-- 2) Assigning a score to remaining elements
     var $candidates = $();
     $nodesToScore.each(function() {
-
-      // TODO: check whether it is possible to ascend to body or not
       var $parent = $(this).parent().not('body, html'),
           $grandParent = $parent.parent().not('body', 'html'),
           txt = normalizedText($(this)),
@@ -212,11 +216,11 @@
         return;
 
       // Readability data for parent and grandparent
-      initNode($parent, flags);
+      initNode($parent, flags.classWeight);
       $candidates = $candidates.add($parent);
 
       if ($grandParent.length) {
-        initNode($grandParent, flags);
+        initNode($grandParent, flags.classWeight);
         $candidates = $candidates.add($grandParent);
       }
 
@@ -231,12 +235,12 @@
 
       // Adding full score to parent
       $parent.data('readability',
-        ($parent.data('readability') + score) * (1 - getLinkDensity($parent)));
+        ($parent.data('readability') + score));
 
       // Adding half score for grand parent
       if ($grandParent.length) {
         $grandParent.data('readability',
-          ($grandParent.data('readability') + score) * (1 - getLinkDensity($grandParent)));
+          ($grandParent.data('readability') + (score / 2)));
       }
     });
 
@@ -244,14 +248,23 @@
     // TODO: optimize
     var $topCandidate = null;
     $candidates.each(function() {
+      var $this = $(this);
+
+      // Applying link density metric
+      $this.data('readability',
+        $this.data('readability') * (1 - getLinkDensity($this)));
+
       if (!$topCandidate ||
-          $(this).data('readability') > $topCandidate.data('readability'))
-        $topCandidate = $(this);
+          $this.data('readability') > $topCandidate.data('readability'))
+        $topCandidate = $this;
     });
 
+    // If not top candidate is found, we back to BODY
+    if (!$topCandidate)
+      $topCandidate = $('body');
+
     //-- 4) Investigating siblings
-    $topCandidate.css('border', '2px solid red');
-    window.d = $topCandidate;
+    return $topCandidate[0];
   }
 
 
@@ -262,7 +275,7 @@
 
     return {
       title: getArticleTitle(),
-      content: article
+      articleNode: article
     };
   };
 }).call(this);
