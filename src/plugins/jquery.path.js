@@ -10,7 +10,9 @@
    */
 
   function _path($) {
-    $.fn.path = function(optimal) {
+
+    // Single item
+    function single(optimal) {
       optimal = (optimal === false) ? false : true;
 
       var $e = $(this),
@@ -62,6 +64,22 @@
 
       // Returning the path
       return path.join(' > ') || 'body';
+    }
+
+    // Multiple items
+    function multiple(optimal) {
+      return 'NOT SUPPORTED';
+    }
+
+    $.fn.path = function(optimal) {
+
+      // Single item or more?
+      if ($(this).length === 1)
+        return single.call(this, optimal);
+      else if ($(this).length > 1)
+        return multiple.call(this, optimal);
+
+      throw Error('jquery.path: cannot apply on an empty selection.');
     };
   }
 
