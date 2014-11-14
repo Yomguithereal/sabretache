@@ -9,6 +9,25 @@
    * DOM elements.
    */
 
+  // Helpers
+  function homogeneous(a) {
+    var f = a[0];
+
+    return a.every(function(i) {
+      return i === f;
+    });
+  }
+
+  function collect($sel, fn) {
+    var acc = [];
+
+    $sel.each(function() {
+      acc.push(fn.apply(this));
+    });
+
+    return acc;
+  }
+
   function _path($) {
 
     // Single item
@@ -21,10 +40,6 @@
           path = [],
           sel,
           i;
-
-      // Safeguard
-      if (this.length !== 1)
-        throw Error('jquery.path: should apply on a single element.');
 
       while (($c.prop('tagName') || '').toLowerCase() !== 'body') {
 
@@ -68,7 +83,50 @@
 
     // Multiple items
     function multiple(optimal) {
-      return 'NOT SUPPORTED';
+      optimal = (optimal === false) ? false : true;
+
+      var $sel = $(this),
+          $parent = $sel.first().parent(),
+          path = '',
+          i,
+          l;
+
+      //-- 1) Trying to find a common parent
+      while ($parent.prop('tagName') !== 'BODY' &&
+             $parent.find($sel).length !== $sel.length) {
+        $parent = $parent.parent();
+      }
+
+      if ($parent.prop('tagName') !== 'BODY')
+        path += $parent.path() + ' ';
+
+      //-- 2) Trying to find common ground on tag names
+      var tags = collect($sel, function() {
+        return $(this).prop('tagName').toLowerCase();
+      });
+
+      if (homogeneous(tags))
+        path += tags[0];
+
+      if ($(path).sameAs($sel))
+        return path;
+
+      //-- 3) Trying to find common ground on classes
+      var classes = $sel.classes();
+
+      for (i = 0, l = classes.length; i < l; i++) {
+        if ($(path + '.' + classes[i]).sameAs($sel))
+          return path + '.' + classes[i];
+      }
+
+      //-- 4) Filtering by visible
+      if ($(path + ':visible').sameAs($sel))
+        return path + ':visible';
+
+      //-- 5) Returning a selector mess as a fallback
+      return collect($sel, function() {
+        return $(this).path();
+      }).join(', ');
     }
 
     $.fn.path = function(optimal) {

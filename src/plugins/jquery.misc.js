@@ -62,6 +62,16 @@
     };
   }
 
+  function _sameAs($) {
+    $.fn.sameAs = function(compareTo) {
+      var $c = $(compareTo);
+
+      return $c &&
+             this.length === $c.length &&
+             this.length === this.filter($c).length;
+    };
+  }
+
   function _nodeText($) {
     $.fn.nodeText = function() {
       return $(this).contents().filter(function() {
@@ -84,6 +94,7 @@
   // Exporting
   sabretache.plugins.push(_classes);
   sabretache.plugins.push(_attributes);
+  sabretache.plugins.push(_sameAs);
   sabretache.plugins.push(_nodeText);
   sabretache.plugins.push(_visibleText);
 }).call(this);

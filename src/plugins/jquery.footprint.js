@@ -74,7 +74,10 @@
       //-- 3) Retrieving attributes
       attrs = $e.attributes(blacklists.attributes);
       Object.keys(attrs).forEach(function(n) {
-        fp.push('[' + n + ']');
+
+        // Getting attribute usage
+        if ($e.parent().parent().parent().find('[' + n + ']').length > 2)
+          fp.push('[' + n + ']');
       });
 
       //-- 4) Computing parent

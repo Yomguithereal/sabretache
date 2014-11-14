@@ -38,6 +38,9 @@
     // Finding similar elements
     var $similar = $(this).similar();
 
+    // Trying to get a relevant path
+    console.log('\nCollection path:', $similar.path());
+
     // Highlighting
     console.log($(this).footprint());
     console.log($similar.length + ' elements found!');

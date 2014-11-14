@@ -14,7 +14,7 @@
     plugins: [],
     settings: {
       footprint: {
-        memoize: false,
+        memoize: true,
         identity: []
       }
     }
