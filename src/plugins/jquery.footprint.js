@@ -39,7 +39,7 @@
         'script',
         'style'
       ]
-    }
+    };
 
     // TODO: customize identity
     // TODO: find another for tables and such
@@ -81,7 +81,7 @@
       });
 
       //-- 4) Computing parent
-      var $parent = $e.parent();
+      $parent = $e.parent();
       if ($parent.prop('tagName') !== 'BODY' &&
           $parent.prop('tagName') !== 'HTML' &&
           recur !== false)

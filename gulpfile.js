@@ -5,6 +5,7 @@ var gulp = require('gulp'),
     rename = require('gulp-rename'),
     header = require('gulp-header'),
     artoo = require('gulp-artoo'),
+    jshint = require('gulp-jshint'),
     webserver = require('gulp-webserver');
 
 // Files
@@ -13,6 +14,13 @@ var files = [
   './src/sabretache.readability.js',
   './src/plugins/*.js'
 ];
+
+// Linting
+gulp.task('lint', function() {
+  return gulp.src(files)
+    .pipe(jshint())
+    .pipe(jshint.reporter('default'));
+});
 
 // Building the files
 gulp.task('build', function() {
@@ -74,5 +82,5 @@ gulp.task('serve', function() {
 });
 
 // Macro-tasks
-gulp.task('default', ['build', 'bookmarklets']);
+gulp.task('default', ['lint', 'build', 'bookmarklets']);
 gulp.task('work', ['build', 'serve', 'watch']);

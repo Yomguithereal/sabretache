@@ -166,7 +166,7 @@
   function getLinkDensity($node) {
     return (normalizedText($node.find('a')) || '').length /
       (normalizedText($node).length || 1);
-  };
+  }
 
   // Retrieving the article
   function grabArticle(flags) {
