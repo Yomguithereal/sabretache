@@ -168,10 +168,9 @@
       (normalizedText($node).length || 1);
   };
 
-
   // Retrieving the article
   function grabArticle(flags) {
-    flags = flags || {
+    flags = flags || {
       classWeight: true,
       stripUnlikelyCandidates: true
     };
